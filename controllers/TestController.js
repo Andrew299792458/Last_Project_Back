@@ -1,4 +1,4 @@
 exports.getTest = (req, res) => {
     console.log("tested")
-    res.send("Tested")
+    res.send("Tested App")
 }
