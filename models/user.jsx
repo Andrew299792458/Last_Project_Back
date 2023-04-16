@@ -7,7 +7,8 @@ const userSchema = new Schema({
     lastName: { type: String, default: null },
     age: { type: Number, default: null },
     email: { type: String, default: null },
-    password: { type: String, default: null }
+    password: { type: String, default: null },
+    image: { type: String, default: null }
 })
 
 module.exports = mongoose.model("User", userSchema)

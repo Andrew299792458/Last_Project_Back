@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
     try {
         const decodedUser = jwt.verify(token, process.env.TOKEN_KEY)
         req.user = decodedUser
-        console.log("ok said")
+        
     } catch (error) {
         console.log(error)
         return res.status(401).send("invalid Token")

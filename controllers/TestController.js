@@ -3,11 +3,26 @@ const User = require("../models/user.jsx")
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken")
 const { validationResult } = require("express-validator");
+const fs = require('fs');
+const path = require('path');
 
 
 exports.SignUp = (req, res) => {
 
     const data = req.body;
+
+    const imageFile = req.file
+    console.log(imageFile)
+
+    const ImageName = "avatar" + Date.now() + imageFile.originalname
+
+    const imagePath = path.join("images", ImageName);
+
+    const newImagePath = path.join("public", imagePath);
+
+    console.log(req.file)
+
+    fs.copyFileSync(imageFile.path, newImagePath);
 
     User.findOne({ email: data.email })
         .then(async (user) => {
@@ -17,13 +32,13 @@ exports.SignUp = (req, res) => {
                 const encryptedPassword = await bcrypt.hash(data.password, 10)
                 const userData = {
                     ...data,
-                    password: encryptedPassword
+                    password: encryptedPassword,
+                    image: imagePath,
                 }
                 const user = new User(userData);
                 user
                     .save()
                     .then((result) => {
-                        console.log(result);
                         res.status(201).json(result);
                     })
                     .catch((error) => {
@@ -64,13 +79,10 @@ exports.SignIn = (req, res) => {
 }
 
 exports.me = (req, res) => {
-    const token = req.headers["x-access-token"]
-    if (!token) {
-        return res.status(403).send("A token required for authentication")
-    }
+
     try {
-        const decodedUser = jwt.verify(token, process.env.TOKEN_KEY)
-        User.findOne({ email: decodedUser.email })
+
+        User.findOne({ email: req.user.email })
             .then((user) => {
                 res.status(200).json({ user })
             })
@@ -136,3 +148,18 @@ exports.changePassword = async (req, res) => {
 }
 
 
+exports.AllUsers = (req, res) => {
+
+    try {
+
+        User.find()
+            .then((users) => {
+                res.status(200).json({ users })
+            })
+            .catch(() => {
+                res.status(500).json({ message: "Error finding user" })
+            })
+    } catch (error) {
+        return res.status(401).send("invalid Token")
+    }
+}
