@@ -10,10 +10,11 @@ const updateUserValidation = require("./validations/updateUserValidation.jsx")
 const changePasswordValidation = require("./validations/changePasswordValidation.jsx")
 const tokenMiddleware = require("./middleware/TokenMiddleware.jsx")
 const { CreatePost, GetPosts, UpdatePost, DeletePost, AllPosts, LikePost } = require("./controllers/PostsController.jsx")
-const { SaveMessage, GetMessages } = require("./controllers/MessageController.jsx")
+const { SaveMessage, GetMessages, DeleteMessages } = require("./controllers/MessageController.jsx")
 const multer = require('multer');
 app.use(express.static('public'));
 app.use(express.json());
+const Message = require("./models/message.jsx")
 const upload = multer({ dest: 'public/images' });
 const http = require('http');
 const server = http.createServer(app);
@@ -37,11 +38,9 @@ app.use(cors({
 
 //chat
 
-const messages = [];
 io.on("connection", (socket) => {
     console.log("a user connected");
     socket.on("message", (message) => {
-        messages.push(message);
         SaveMessage(message)
         io.emit("message", message);
     });
@@ -49,6 +48,9 @@ io.on("connection", (socket) => {
         console.log("user disconnected");
     });
 });
+
+
+app.delete('/collection', tokenMiddleware, DeleteMessages);
 
 //chat
 
